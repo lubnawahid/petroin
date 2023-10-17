@@ -5,9 +5,12 @@ import 'package:petro/screen/screen2.dart';
 
 
 
+
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -26,8 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final Map<String, dynamic> requestBody = {
       "userName": usernameController.text,
       "password": passwordController.text,
-      "authType": "FORMS",
-      "ipAddress": "",
     };
 
     try {
@@ -38,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Successful login, handle the response as needed
+        // Successful login
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print("Login successful: $responseData");
 
@@ -48,9 +49,29 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (context) => Dashboard()), // Replace DashboardScreen() with your desired screen
         );
       } else {
-        // Failed login, handle the error
+        // Failed login
+        final Map<String, dynamic> errorData = jsonDecode(response.body);
         print("Failed to log in. Status code: ${response.statusCode}");
-        print("Response body: ${response.body}");
+        print("Error message: ${errorData['message']}");
+
+        // Show an error message to the user
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Login Failed"),
+              content: Text(errorData['message']),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
       }
     } catch (e) {
       // Handle any network errors

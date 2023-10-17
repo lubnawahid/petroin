@@ -1,7 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 import 'package:petro/screen/screen2.dart';
+
+import 'logincontroller.dart';
 
 
 
@@ -20,64 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _obscureText = !_obscureText;
     });
   }
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final LoginController _loginController = Get.put(LoginController());
 
-  Future<void> login() async {
-    final String apiUrl = 'https://www.petroinfotech.com/PetroHSE/api/Admin/ValidateLogin';
-
-    final Map<String, dynamic> requestBody = {
-      "userName": usernameController.text,
-      "password": passwordController.text,
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
-      );
-
-      if (response.statusCode == 200) {
-        // Successful login
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        print("Login successful: $responseData");
-
-        // Navigate to the dashboard or another screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Dashboard()), // Replace DashboardScreen() with your desired screen
-        );
-      } else {
-        // Failed login
-        final Map<String, dynamic> errorData = jsonDecode(response.body);
-        print("Failed to log in. Status code: ${response.statusCode}");
-        print("Error message: ${errorData['message']}");
-
-        // Show an error message to the user
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("Login Failed"),
-              content: Text(errorData['message']),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("OK"),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } catch (e) {
-      // Handle any network errors
-      print("Error during login: $e");
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Padding(
           padding: const EdgeInsets.all(8),
           child: TextField(
-            controller: usernameController,
+            controller: TextEditingController(),
             decoration: InputDecoration(
               prefixIcon:Icon(Icons.person),
               labelText: "username",
@@ -113,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Padding(
           padding: const EdgeInsets.all(8),
           child: TextField(
-            controller: passwordController,
+            controller: TextEditingController(),
 
             obscureText: _obscureText,
             decoration: InputDecoration(
@@ -146,16 +94,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
         ),
         ElevatedButton(
-          child: Text("Login",style: TextStyle(color: Colors.white),),
+          // child: Text("Login",style: TextStyle(color: Colors.white),),
           onPressed: () {
-            login();
-            style:
-            ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0)),
-                primary: Color(0xFF387B74),
-                fixedSize: Size(300, 50),
+            _loginController.login(
+              Get.find<TextEditingController>().text,
+              Get.find<TextEditingController>().text,
             );
           },
+          child: Obx(() {
+            return _loginController.isLoading.value
+                ? CircularProgressIndicator()
+                : Text('Login');
+          }),
             ),
             SizedBox(height: 30.0,),
             Row(

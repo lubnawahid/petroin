@@ -1,31 +1,65 @@
-import 'package:get/get.dart';
+ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:petro/screen/screen2.dart';
-
+//
+// class LoginController extends GetxController {
+//   var isLoading = false.obs;
+//
+//   Future<void> login(String username, String password) async {
+//     try {
+//       isLoading(true);
+//
+//       final response = await http.post(
+//         Uri.parse('https://www.petroinfotech.com/PetroHSE/api/Admin/ValidateLogin'),
+//         body: {
+//           "userName": username,
+//           "password": password,
+//           "authType": "FORMS",
+//           "ipAddress": "",
+//         },
+//       );
+//
+//       if (response.statusCode == 200) {
+//         // Handle the success case here
+//         print('Login successful');
+//       } else {
+//         // Handle the error case here
+//         print('Login failed');
+//       }
+//     } finally {
+//       isLoading(false);
+//     }
+//   }
+// }
 class LoginController extends GetxController {
-  RxBool isLoading = false.obs;
+  var isLoading = false.obs;
 
-  Future<void> login(String userName, String password) async {
-    isLoading(true);
+  Future<void> login(String username, String password) async {
+    try {
+      isLoading(true);
 
-    final response = await http.post(
-      Uri.parse('https://www.petroinfotech.com/PetroHSE/api/Admin/ValidateLogin'),
-      body: {
-        "userName": userName,
-        "password": password,
-        "authType": "FORMS",
-        "ipAddress": "",
-      },
-    );
+      final response = await http.post(
+        Uri.parse('https://www.petroinfotech.com/PetroHSE/api/Admin/ValidateLogin'),
+        body: {
+          "userName": username,
+          "password": password,
+          "authType": "FORMS",
+          "ipAddress": "",
+        },
+      );
 
-    isLoading(false);
-
-    if (response.statusCode == 200) {
-      // Handle successful login, e.g., navigate to the next screen
-      Get.to(() => Dashboard());
-    } else {
-      // Handle login failure, show an error message
-      Get.snackbar('Login Failed', 'Invalid username or password');
+      if (response.statusCode == 200) {
+        // Handle the success case here
+        print('Login successful');
+      } else {
+        // Handle the error case here
+        print('Login failed. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (error) {
+      // Handle other errors, such as network issues
+      print('Error during login: $error');
+    } finally {
+      isLoading(false);
     }
   }
 }
